@@ -1,33 +1,43 @@
 <?php
 include '../conexao.php'; // Conexão com o banco
 
-// Verifica se o método é POST e se o campo foi enviado
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $cod = $_POST['cod'] ?? null;
+// Verifica se o formulário foi enviado via método POST e se o campo 'cod' foi enviado
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cod'])) {
+    $cod = $_POST['cod']; // Código enviado pelo scanner no formulário
 
     if (!$cod) {
-        die('Código de barras não recebido ou inválido.');
-    }
-
-    // Exibição para depuração do código recebido
-    echo "Código recebido: " . htmlspecialchars($cod);
-
-    // Buscando informações do banco para o código
-    $consulta = $mysqli->query("SELECT * FROM militares WHERE MIL_CODBAR = '$cod'");
-    if (!$consulta) {
-        die("Erro na consulta SQL: " . $mysqli->error);
-    }
-
-    if ($consulta->num_rows == 0) {
-        echo "<script>alert('Código de barras não encontrado no banco de dados!'); window.location.href='index5.php';</script>";
+        // Se o código não for enviado ou estiver vazio, exibe erro
+        echo "<p>Erro: Código de barras não recebido.</p>";
+        echo "<p>Volte e passe novamente o código.</p>";
         exit;
     }
 
-    // Dados do militar encontrados no banco
-    $row = $consulta->fetch_assoc();
-    echo "<h3>Militar encontrado:</h3>";
-    echo "Nome: " . $row['MIL_NDG'] . "<br>";
-    echo "Posto/Graduação: " . $row['MIL_POSTGRAD'] . "<br>";
-    echo "Código de barras: " . $row['MIL_CODBAR'] . "<br>";
+    // Depuração: Exibe o código enviado pelo scanner
+    echo "<p>Código recebido: " . htmlspecialchars($cod) . "</p>";
+
+    // Realiza consulta ao banco para verificar se o código de barras existe
+    $consulta = $mysqli->query("SELECT * FROM militares WHERE MIL_CODBAR = '$cod'");
+    if (!$consulta) {
+        // Exibe erro caso a consulta ao banco falhe
+        die("<p>Erro na consulta ao banco de dados: " . $mysqli->error . "</p>");
+    }
+
+    if ($consulta->num_rows === 0) {
+        // Caso nenhum resultado seja encontrado, exibe alerta
+        echo "<p>Erro: Código de barras não encontrado no banco de dados.</p>";
+        echo "<p>Volte e passe novamente o código.</p>";
+        exit;
+    }
+
+    // Caso o código seja encontrado, exibe os dados do militar
+    $militar = $consulta->fetch_assoc();
+    echo "<h3>Dados do Militar Encontrado:</h3>";
+    echo "<p><strong>Nome:</strong> " . htmlspecialchars($militar['MIL_NDG']) . "</p>";
+    echo "<p><strong>Posto/Graduação:</strong> " . htmlspecialchars($militar['MIL_POSTGRAD']) . "</p>";
+    echo "<p><strong>Código de Barras:</strong> " . htmlspecialchars($militar['MIL_CODBAR']) . "</p>";
+} else {
+    // Caso o método não seja POST ou nenhuma variável 'cod' seja enviada
+    echo "<p>Erro: Nenhum código de barras foi enviado.</p>";
+    echo "<p>Volte e passe o código novamente.</p>";
 }
 ?>
