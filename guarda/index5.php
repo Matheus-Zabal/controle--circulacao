@@ -1,40 +1,44 @@
-﻿<?php
-include '../conexao.php'
-?>
 <?php
-  session_start();
-  
+include '../conexao.php'; // Conexão com o banco
+session_start();
 
-
-// A variavel $SQL pega as variaveis $login e $senha, faz uma pesquisa na tabela usuarios
-$sql = $mysqli->query("SELECT * FROM `usuarios` WHERE `USU_LOGIN` = '".$_SESSION['USU_LOGIN']."' AND `USU_SENHA`= '".$_SESSION['USU_SENHA']."' AND `USU_PERFIL` = 'Guarda' "); 
- if($sql->num_rows != 1)
-    {
-  session_destroy();
-    echo"<script language='javascript' type='text/javascript'>alert('ALGO ESTA ERRADO, O SENHOR NO PODE ESTAR NESTA PAGINA');window.location.href='../index.php';</script>";  
-  exit;
-  }
-   ?>
+// Autenticação: Verifica o perfil do usuário
+$sql = $mysqli->query("SELECT * FROM `usuarios` WHERE `USU_LOGIN` = '".$_SESSION['USU_LOGIN']."' AND `USU_SENHA`= '".$_SESSION['USU_SENHA']."' AND `USU_PERFIL` = 'Guarda'"); 
+if ($sql->num_rows != 1) {
+    session_destroy();
+    echo "<script>alert('ALGO ESTÁ ERRADO, O SENHOR NÃO PODE ESTAR NESTA PÁGINA');window.location.href='../index.php';</script>";  
+    exit;
+}
+?>
 <html>
 <head>
-<Meta http-equiv="refresh" content="60" />
+<meta http-equiv="refresh" content="60" /> <!-- Atualização automática da página -->
 <title>Circulação de Pessoas</title>
 <link rel="stylesheet" href="css/estiloMenu.css">
-<div id="container">
 </head>
 <body>
-<center><h2>ENTRADA E SAÍDA DE MILITARES</h2></center><br>
-<center><h4>PASSE SEU CÓDIGO DE BARRAS NO LEITOR</h4></center><br>
+<div id="container">
+    <center>
+        <h2>ENTRADA E SAÍDA DE MILITARES</h2>
+        <h4>PASSE SEU CÓDIGO DE BARRAS NO LEITOR</h4>
+        <form method="POST" action="mil_ent_barra1.php" id="formlogin" name="formlogin">
+            <input type="text" name="cod" id="cod" autocomplete="off" placeholder="Passe o código"/><br><br>
+        </form>
+    </center>
+</div>
 
+<!-- Script para forçar envio do formulário ao pressionar Enter -->
+<script>
+document.getElementById('cod').addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') {
+        document.forms['formlogin'].submit(); // Envia o formulário
+    }
+});
 
-<center><form method="POST" action="mil_ent_barra1.php" id="formlogin" name="formlogin" >
- <input type="text" name="cod" id="cod" /><br> <br> 
- </form></center>
- 
- <!--deixar o cursor piscando para codigo de barras-->
-  <script language="javascript">
-document.getElementById('cod').focus();
+// Deixar o cursor piscando no campo de entrada
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('cod').focus();
+});
 </script>
 </body>
- </div>
 </html>
